@@ -5062,7 +5062,6 @@
         }
         this.fonts = this.fonts || {};
         var fontcopy = {
-				id: font.id,
                 w: font.w,
                 face: {},
                 glyphs: {}
@@ -5071,16 +5070,11 @@
         for (var prop in font.face) if (font.face[has](prop)) {
             fontcopy.face[prop] = font.face[prop];
         }
-
         if (this.fonts[family]) {
             this.fonts[family].push(fontcopy);
         } else {
             this.fonts[family] = [fontcopy];
         }
-        if (typeof(fontcopy.id) !== "undefined") {
-        	this.fontsById[fontcopy.id] = fontcopy;
-		}
-
         if (!font.svg) {
             fontcopy.face["units-per-em"] = toInt(font.face["units-per-em"], 10);
             for (var glyph in font.glyphs) if (font.glyphs[has](glyph)) {
@@ -5145,33 +5139,6 @@
         }
         return thefont;
     };
-    /*\
-	 * Paper.getFontById
-	 [ method ]
-	 **
-	 * Finds font object in the registered fonts by the ID assigned to the font.
-	 **
-	 > Parameters
-	 **
-	 - id (string) the id of the font to lookup
-	 > Usage
-	 | paper.print(100, 100, "Test string", paper.getFontById("Times"), 30);
-    \*/
-    paperproto.getFontById = function (id) {
-		if (!R.fontsById) {
-			return;
-		}
-
-		var font;
-		var idRegex = new RegExp("(^|\\s)" + id.replace(/[^\w\d\s+!~.:_-]/g, E) + "(\\s|$)", "i");
-		for (var fontId in R.fontsById) if (R.fontsById[has](fontId)) {
-			if (idRegex.test(fontId)) {
-				font = R.fontsById[fontId];
-				break;
-			}
-		}
-		return font;
-	};
     /*\
      * Paper.print
      [ method ]
