@@ -377,13 +377,13 @@
     };
     (typeof module != "undefined" && module.exports) ? (module.exports = eve) : (typeof define != "undefined" ? (define("eve", [], function() { return eve; })) : (glob.eve = eve));
 })(window || this);
-// ┌─────────────────────────────────────────────────────────────────────┐ \\
-// │ "Raphaël 2.1.2" - JavaScript Vector Library                         │ \\
-// ├─────────────────────────────────────────────────────────────────────┤ \\
-// │ Copyright (c) 2008-2011 Dmitry Baranovskiy (http://raphaeljs.com)   │ \\
-// │ Copyright (c) 2008-2011 Sencha Labs (http://sencha.com)             │ \\
-// │ Licensed under the MIT (http://raphaeljs.com/license.html) license. │ \\
-// └─────────────────────────────────────────────────────────────────────┘ \\
+// ??????????????????????????????????????????????????????????????????????? \\
+// ? "Raphaël 2.1.2" - JavaScript Vector Library                         ? \\
+// ??????????????????????????????????????????????????????????????????????? \\
+// ? Copyright (c) 2008-2011 Dmitry Baranovskiy (http://raphaeljs.com)   ? \\
+// ? Copyright (c) 2008-2011 Sencha Labs (http://sencha.com)             ? \\
+// ? Licensed under the MIT (http://raphaeljs.com/license.html) license. ? \\
+// ??????????????????????????????????????????????????????????????????????? \\
 
 (function (glob, factory) {
     // AMD support
@@ -505,7 +505,7 @@
              | var c = paper.circle(10, 10, 10).attr({hue: .45});
              | // or even like this:
              | c.animate({hue: 1}, 1e3);
-             | 
+             |
              | // You could also create custom attribute
              | // with multiple parameters:
              | paper.customAttributes.hsb = function (h, s, b) {
@@ -3455,7 +3455,7 @@
      [ method ]
      **
      * Adds or retrieves given value asociated with given key.
-     ** 
+     **
      * See also @Element.removeData
      > Parameters
      - key (string) key to store data
@@ -3563,8 +3563,8 @@
      - mcontext (object) #optional context for moving handler
      - scontext (object) #optional context for drag start handler
      - econtext (object) #optional context for drag end handler
-     * Additionaly following `drag` events will be triggered: `drag.start.<id>` on start, 
-     * `drag.end.<id>` on end and `drag.move.<id>` on every move. When element will be dragged over another element 
+     * Additionaly following `drag` events will be triggered: `drag.start.<id>` on start,
+     * `drag.end.<id>` on end and `drag.move.<id>` on every move. When element will be dragged over another element
      * `drag.over.<id>` will be fired as well.
      *
      * Start event and start handler will be called in specified context or in context of the element with following parameters:
@@ -3866,7 +3866,7 @@
      * Paper.setViewBox
      [ method ]
      **
-     * Sets the view box of the paper. Practically it gives you ability to zoom and pan whole paper surface by 
+     * Sets the view box of the paper. Practically it gives you ability to zoom and pan whole paper surface by
      * specifying new boundaries.
      **
      > Parameters
@@ -4339,7 +4339,7 @@
     elproto.getPath = function () {
         var path,
             getPath = R._getPath[this.type];
-        
+
         if (this.type == "text" || this.type == "set") {
             return;
         }
@@ -4625,8 +4625,8 @@
             }
         }
         return element;
-        // 
-        // 
+        //
+        //
         // var a = params ? R.animation(params, ms, easing, callback) : anim,
         //     status = element.status(anim);
         // return this.animate(a).status(a, status * anim.ms / a.ms);
@@ -5441,6 +5441,7 @@
         }
         this.fonts = this.fonts || {};
         var fontcopy = {
+				id: font.id,
                 w: font.w,
                 face: {},
                 glyphs: {}
@@ -5449,11 +5450,16 @@
         for (var prop in font.face) if (font.face[has](prop)) {
             fontcopy.face[prop] = font.face[prop];
         }
+
         if (this.fonts[family]) {
             this.fonts[family].push(fontcopy);
         } else {
             this.fonts[family] = [fontcopy];
         }
+        if (typeof(fontcopy.id) !== "undefined") {
+        	this.fontsById[fontcopy.id] = fontcopy;
+		}
+
         if (!font.svg) {
             fontcopy.face["units-per-em"] = toInt(font.face["units-per-em"], 10);
             for (var glyph in font.glyphs) if (font.glyphs[has](glyph)) {
@@ -5519,6 +5525,33 @@
         return thefont;
     };
     /*\
+	 * Paper.getFontById
+	 [ method ]
+	 **
+	 * Finds font object in the registered fonts by the ID assigned to the font.
+	 **
+	 > Parameters
+	 **
+	 - id (string) the id of the font to lookup
+	 > Usage
+	 | paper.print(100, 100, "Test string", paper.getFontById("Times"), 30);
+    \*/
+    paperproto.getFontById = function (id) {
+		if (!R.fontsById) {
+			return;
+		}
+
+		var font;
+		var idRegex = new RegExp("(^|\\s)" + id.replace(/[^\w\d\s+!~.:_-]/g, E) + "(\\s|$)", "i");
+		for (var fontId in R.fontsById) if (R.fontsById[has](fontId)) {
+			if (idRegex.test(fontId)) {
+				font = R.fontsById[fontId];
+				break;
+			}
+		}
+		return font;
+	};
+    /*\
      * Paper.print
      [ method ]
      **
@@ -5532,7 +5565,7 @@
      - string (string) text to print
      - font (object) font object, see @Paper.getFont
      - size (number) #optional size of the font, default is `16`
-     - origin (string) #optional could be `"baseline"` or `"middle"`, default is `"middle"`
+     - origin (string) #optional could be `"baseline"`, `"middle"`, or "topleft"; default is `"middle"`
      - letter_spacing (number) #optional number in range `-1..1`, default is `0`
      - line_spacing (number) #optional number in range `1..3`, default is `1`
      = (object) resulting path element, which consist of all letters
@@ -5540,7 +5573,7 @@
      | var txt = r.print(10, 50, "print", r.getFont("Museo"), 30).attr({fill: "#fff"});
     \*/
     paperproto.print = function (x, y, string, font, size, origin, letter_spacing, line_spacing) {
-        origin = origin || "middle"; // baseline|middle
+        origin = origin || "middle"; // baseline|middle|topleft
         letter_spacing = mmax(mmin(letter_spacing || 0, 1), -1);
         line_spacing = mmax(mmin(line_spacing || 1, 3), 1);
         var letters = Str(string)[split](E),
@@ -5552,10 +5585,10 @@
         if (font) {
             scale = (size || 16) / font.face["units-per-em"];
             var bb = font.face.bbox[split](separator),
-                top = +bb[0],
+                top = ( origin === "topleft" ? 0 : +bb[0] ),
                 lineHeight = bb[3] - bb[1],
                 shifty = 0,
-                height = +bb[1] + (origin == "baseline" ? lineHeight + (+font.face.descent) : lineHeight / 2);
+                height = ( origin === "topleft" ? 0 : +bb[1] + (origin == "baseline" ? lineHeight + (+font.face.descent) : lineHeight / 2) );
             for (var i = 0, ii = letters.length; i < ii; i++) {
                 if (letters[i] == "\n") {
                     shift = 0;
