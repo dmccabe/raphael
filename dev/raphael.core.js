@@ -5087,7 +5087,7 @@
                         }) + "z"
                 };
                 if (path.k) {
-                    for (var k in path.k) if (path[has](k)) {
+                    for (var k in path.k) if (path.k[has](k)) {
                         fontcopy.glyphs[glyph].k[k] = path.k[k];
                     }
                 }
@@ -5186,7 +5186,7 @@
                 } else {
                     var prev = notfirst && font.glyphs[letters[i - 1]] || {},
                         curr = font.glyphs[letters[i]];
-                    shift += notfirst ? (prev.w || font.w) + (prev.k && prev.k[letters[i]] || 0) + (font.w * letter_spacing) : 0;
+                    shift += notfirst ? (prev.w || font.w) - (prev.k && prev.k[letters[i]] || 0) + (font.w * letter_spacing) : 0;
                     notfirst = 1;
                 }
                 if (curr && curr.d) {
