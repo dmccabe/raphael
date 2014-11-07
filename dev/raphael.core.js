@@ -5162,75 +5162,48 @@
      | var txt = r.print(10, 50, "print", r.getFont("Museo"), 30).attr({fill: "#fff"});
     \*/
     paperproto.print = function (x, y, string, font, size, origin, alignment, letter_spacing, line_spacing) {
-        origin = origin || "middle"; // baseline|middle|topleft
-        letter_spacing = mmax(mmin(letter_spacing || 0, 1), -1);
-        line_spacing = mmax(mmin(line_spacing || 1, 3), 1);
-        var letters = Str(string)[split](E),
-            shift = 0,
-            notfirst = 0,
-            path = E,
-            scale;
-        R.is(font, "string") && (font = this.getFont(font));
-        if (font) {
-            scale = (size || 16) / font.face["units-per-em"];
-            var bb = font.face.bbox[split](separator),
-                top = ( origin === "topleft" ? 0 : +bb[0] ),
-                lineHeight = bb[3] - bb[1],
-                shifty = 0,
-                height = ( origin === "topleft" ? 0 : +bb[1] + (origin == "baseline" ? lineHeight + (+font.face.descent) : lineHeight / 2) );
+origin = origin || "middle"; // baseline|middle|topleft
+		letter_spacing = mmax(mmin(letter_spacing || 0, 1), -1);
+		line_spacing = mmax(mmin(line_spacing || 1, 3), 1);
+		var letters = Str(string)[split](E),
+			shift = 0,
+			notfirst = 0,
+			path = E,
+			scale;
+		R.is(font, "string") && (font = this.getFont(font));
+		if (font) {
+			scale = (size || 16) / font.face["units-per-em"];
+			var bb = font.face.bbox[split](separator),
+				top = ( origin === "topleft" ? 0 : +bb[0] ),
+				lineHeight = bb[3] - bb[1],
+				shifty = 0,
+				height = ( origin === "topleft" ? 0 : +bb[1] + (origin == "baseline" ? lineHeight + (+font.face.descent) : lineHeight / 2) );
 
-            var lines = [];
-            var lineText = E;
-            var maxLineWidth = 0;
-            for (var i = 0, ii = letters.length; i < ii; i++) {
-                var prev = notfirst && font.glyphs[letters[i - 1]] || {};
-                if (letters[i] == "\n") {
-                    var line = { text: lineText, width: shift + (prev.w || font.w) };
-                    lines.push(line);
-                    maxLineWidth = Math.max(line.width, maxLineWidth);
-                    lineText = E;
+			for (var i = 0, ii = letters.length; i < ii; i++) {
+				if (letters[i] == "\n") {
+					shift = 0;
+					curr = 0;
+					notfirst = 0;
+					shifty += lineHeight * line_spacing;
+				} else {
+					var prev = notfirst && font.glyphs[letters[i - 1]] || {},
+						curr = font.glyphs[letters[i]];
+					shift += notfirst ? (prev.w || font.w) - (prev.k && prev.k[letters[i]] || 0) + (font.w * letter_spacing) : 0;
+					notfirst = 1;
+				}
 
-                    shift = 0;
-                    curr = 0;
-                    notfirst = 0;
-                    shifty += lineHeight * line_spacing;
-                } else {
-                    var curr = font.glyphs[letters[i]];
-                    shift += notfirst ? (prev.w || font.w) - (prev.k && prev.k[letters[i]] || 0) + (font.w * letter_spacing) : 0;
-                    notfirst = 1;
-                }
-                if (curr && curr.d) {
-                    lineText += R.transformPath(curr.d, ["t", shift * scale, shifty * scale, "s", scale, scale, top, height, "t", (x - top) / scale, (y - height) / scale]);
-                }
-            }
-
-			      // add in the last line we came across
-            var last = notfirst && font.glyphs[letters[letters.length - 1]] || {};
-            var lastLine = { text: lineText, width: shift + (prev.w || font.w) };
-            lines.push(lastLine);
-            maxLineWidth = Math.max(lastLine.width, maxLineWidth);
-
-			      // determine how much the lines need to be moved based on the selected alignment
-            var alignmentFactor;
-            switch(alignment) {
-              case 'center':
-                alignmentFactor = 0.5;
-                break;
-              case 'right':
-                alignmentFactor = 1;
-                break;
-              default:
-                alignmentFactor = 0;
-                break;
-            }
-            for (var lineIndex = 0; lineIndex < lines.length; lineIndex++) {
-                var offset = maxLineWidth - lines[lineIndex].width;
-                path += R.transformPath(lines[lineIndex].text, ["t", offset * scale * alignmentFactor, 0]);
-            }
-        }
-        return this.path(path).attr({
-            fill: "#000",
-            stroke: "none"
+				var d = curr && curr.d
+				// if we come across any characters we don't have a path for (e.g. space), we should still add something to the path for them so that the
+				// path width can be calculated correctly later. without this, the path width will be smaller, which throws off our alignmetn calculations
+				if (!d) {
+				  d = "M" + shift + "," + shifty;
+				}
+				path += R.transformPath(d, ["t", shift * scale, shifty * scale, "s", scale, scale, top, height, "t", (x - top) / scale, (y - height) / scale]);
+			}
+		}
+		return this.path(path).attr({
+			fill: "#000",
+			stroke: "none"
         });
     };
 
