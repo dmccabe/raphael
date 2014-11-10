@@ -5204,7 +5204,7 @@
 				// if we come across any characters we don't have a path for (e.g. space), we should still add something to the path for them so that the
 				// path width can be calculated correctly later. without this, the path width will be smaller, which throws off our alignmetn calculations
 				if (!d) {
-				  d = "M" + shift + "," + shifty;
+				  d = "M0,0";
 				}
 				path += R.transformPath(d, ["t", shift * scale, shifty * scale, "s", scale, scale, top, height, "t", (x - top) / scale, (y - height) / scale]);
 			}

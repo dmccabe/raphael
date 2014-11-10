@@ -5518,6 +5518,15 @@
         }
         return thefont;
     };
+    /**
+	 * Gets the line height for a font
+	 * @param font The font to check
+	 * @param size The size the font is being displayed at
+	 */
+	paperproto.getFontLineHeight = function (font, size) {
+	    var bbox = font.face.bbox.split(/[, ]+/);
+	    return (bbox[3] - bbox[1]) * size / font.face["units-per-em"];
+    };
     /*\
      * Paper.print
      [ method ]
@@ -5533,15 +5542,14 @@
      - font (object) font object, see @Paper.getFont
      - size (number) #optional size of the font, default is `16`
      - origin (string) #optional could be `"baseline"`, `"middle"`, or "topleft"; default is `"middle"`
-     - alignment (string) #optional horionztal alignment for the text - only comes into play when there are multple lines. Could be "left", "center", or "right". Default is "left".
      - letter_spacing (number) #optional number in range `-1..1`, default is `0`
      - line_spacing (number) #optional number in range `1..3`, default is `1`
      = (object) resulting path element, which consist of all letters
      > Usage
      | var txt = r.print(10, 50, "print", r.getFont("Museo"), 30).attr({fill: "#fff"});
     \*/
-    paperproto.print = function (x, y, string, font, size, origin, alignment, letter_spacing, line_spacing) {
-origin = origin || "middle"; // baseline|middle|topleft
+    paperproto.print = function (x, y, string, font, size, origin, letter_spacing, line_spacing) {
+		origin = origin || "middle"; // baseline|middle|topleft
 		letter_spacing = mmax(mmin(letter_spacing || 0, 1), -1);
 		line_spacing = mmax(mmin(line_spacing || 1, 3), 1);
 		var letters = Str(string)[split](E),
@@ -5575,7 +5583,7 @@ origin = origin || "middle"; // baseline|middle|topleft
 				// if we come across any characters we don't have a path for (e.g. space), we should still add something to the path for them so that the
 				// path width can be calculated correctly later. without this, the path width will be smaller, which throws off our alignmetn calculations
 				if (!d) {
-				  d = "M" + shift + "," + shifty;
+				  d = "M0,0";
 				}
 				path += R.transformPath(d, ["t", shift * scale, shifty * scale, "s", scale, scale, top, height, "t", (x - top) / scale, (y - height) / scale]);
 			}
