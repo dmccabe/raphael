@@ -827,7 +827,7 @@
             return array.push(array.splice(i, 1)[0]);
         }
     }
-    function cacher(f, scope, postprocessor) {
+    function cacher(f, cacheSize, scope, postprocessor) {
         function newf() {
             var arg = Array.prototype.slice.call(arguments, 0),
                 args = arg.join("\u2400"),
@@ -837,7 +837,7 @@
                 repush(count, args);
                 return postprocessor ? postprocessor(cache[args]) : cache[args];
             }
-            count.length >= 1e3 && delete cache[count.shift()];
+            count.length >= (cacheSize || 1e3) && delete cache[count.shift()];
             count.push(args);
             cache[args] = f[apply](scope, arg);
             return postprocessor ? postprocessor(cache[args]) : cache[args];
@@ -961,7 +961,7 @@
             return rgb;
         }
         return {r: -1, g: -1, b: -1, hex: "none", error: 1, toString: clrToString};
-    }, R);
+    }, 1e3, R);
     /*\
      * Raphael.hsb
      [ method ]
@@ -1845,7 +1845,7 @@
                     var X = x * math.cos(rad) - y * math.sin(rad),
                         Y = x * math.sin(rad) + y * math.cos(rad);
                     return {x: X, y: Y};
-                });
+                }, 3);
             if (!recursive) {
                 xy = rotate(x1, y1, -rad);
                 x1 = xy.x;
@@ -1972,7 +1972,7 @@
                 min: {x: mmin[apply](0, x), y: mmin[apply](0, y)},
                 max: {x: mmax[apply](0, x), y: mmax[apply](0, y)}
             };
-        }),
+        }, 3),
         path2curve = R._path2curve = cacher(function (path, path2) {
             var pth = !path2 && paths(path);
             if (!path2 && pth.curve) {
@@ -2083,7 +2083,7 @@
                 pth.curve = pathClone(p);
             }
             return p2 ? [p, p2] : p;
-        }, null, pathClone),
+        }, 3, null, pathClone),
         parseDots = R._parseDots = cacher(function (gradient) {
             var dots = [];
             for (var i = 0, ii = gradient.length; i < ii; i++) {
@@ -2120,7 +2120,7 @@
                 }
             }
             return dots;
-        }),
+        }, 3),
         tear = R._tear = function (el, paper) {
             el == paper.top && (paper.top = el.prev);
             el == paper.bottom && (paper.bottom = el.next);
