@@ -5140,11 +5140,25 @@
         return thefont;
     };
     /**
-	 * Gets the line height for a font
-	 * @param font The font to check
-	 * @param size The size the font is being displayed at
-	 */
-	paperproto.getFontLineHeight = function (font, size) {
+     * Finds any characters in the string that can be represented using the font, ignoring whitespace characters.
+     */
+    paperproto.getUnprintableCharacters = function (font, string) {
+        var unprintable = [];
+        var letters = string.replace(/[\s\\n]/g, '').split(E);
+        for (var i = 0; i < letters.length; i++) {
+            var letter = letters[i];
+            if (!font.glyphs[letter]) {
+                unprintable.push(letter);
+            }
+        }
+        return unprintable;
+    };
+    /**
+	   * Gets the line height for a font
+	   * @param font The font to check
+	   * @param size The size the font is being displayed at
+	   */
+	  paperproto.getFontLineHeight = function (font, size) {
 	    var bbox = font.face.bbox.split(/[, ]+/);
 	    return (bbox[3] - bbox[1]) * size / font.face["units-per-em"];
     };
